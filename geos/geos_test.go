@@ -16,3 +16,11 @@ func TestVersion(t *testing.T) {
 		t.Errorf("Version(): %q didn't match regex \"%s\"", version, re)
 	}
 }
+
+func TestNewGeosContext(t *testing.T) {
+	geos := NewGeosContext()
+
+	if geos == geosGlobalContext {
+		t.Error("Expected different contexts")
+	}
+}

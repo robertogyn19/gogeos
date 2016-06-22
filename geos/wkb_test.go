@@ -13,11 +13,11 @@ var wkbDecoderTests = []struct {
 }
 
 func TestWkbDecoderRead(t *testing.T) {
-	wktDecoder := newWktDecoder()
+	wktDecoder := newWktDecoder(geosGlobalContext)
 	wkbDecoder := newWkbDecoder()
 	for i, test := range wkbDecoderTests {
 		g1 := Must(wkbDecoder.decode(test.wkb))
-		g2 := Must(wktDecoder.decode(test.wkt))
+		g2 := Must(wktDecoder.decode(geosGlobalContext, test.wkt))
 		if !mustEqual(g1.Equals(g2)) {
 			t.Errorf("#%d: should equal! got %v want %v", i, g1, g2)
 		}
@@ -32,11 +32,11 @@ var wkbDecoderHexTests = []struct {
 }
 
 func TestWkbDecoderHexRead(t *testing.T) {
-	wktDecoder := newWktDecoder()
+	wktDecoder := newWktDecoder(geosGlobalContext)
 	wkbDecoder := newWkbDecoder()
 	for i, test := range wkbDecoderHexTests {
 		g1 := Must(wkbDecoder.decodeHex(test.hex))
-		g2 := Must(wktDecoder.decode(test.wkt))
+		g2 := Must(wktDecoder.decode(geosGlobalContext, test.wkt))
 		if !mustEqual(g1.Equals(g2)) {
 			t.Errorf("#%d: should equal! got %v want %v", i, g1, g2)
 		}
@@ -51,10 +51,10 @@ var wkbEncoderTests = []struct {
 }
 
 func TestWkbEncoderEncode(t *testing.T) {
-	wktDecoder := newWktDecoder()
+	wktDecoder := newWktDecoder(geosGlobalContext)
 	wkbEncoder := newWkbEncoder()
 	for i, test := range wkbEncoderTests {
-		g1 := Must(wktDecoder.decode(test.wkt))
+		g1 := Must(wktDecoder.decode(geosGlobalContext, test.wkt))
 		actual, err := wkbEncoder.encode(g1)
 		if err != nil {
 			panic(err)
@@ -73,10 +73,10 @@ var wkbEncoderHexTests = []struct {
 }
 
 func TestWkbEncoderEncodeHex(t *testing.T) {
-	wktDecoder := newWktDecoder()
+	wktDecoder := newWktDecoder(geosGlobalContext)
 	wkbEncoder := newWkbEncoder()
 	for i, test := range wkbEncoderHexTests {
-		g1 := Must(wktDecoder.decode(test.wkt))
+		g1 := Must(wktDecoder.decode(geosGlobalContext, test.wkt))
 		actual, err := wkbEncoder.encodeHex(g1)
 		if err != nil {
 			panic(err)

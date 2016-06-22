@@ -10,11 +10,11 @@ var wktEncoderTests = []struct{ in, out string }{
 
 func TestWktEncoder(t *testing.T) {
 	encoder := newWktEncoder()
-	decoder := newWktDecoder()
+	decoder := newWktDecoder(geosGlobalContext)
 	var geom *Geometry
 	var err error
 	for _, test := range wktEncoderTests {
-		geom, err = decoder.decode(test.in)
+		geom, err = decoder.decode(geosGlobalContext, test.in)
 		if err != nil {
 			t.Errorf("wktDecoder.decode(): %v", err)
 		}
