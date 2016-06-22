@@ -16,8 +16,12 @@ type wktDecoder struct {
 }
 
 // Creates a new WKT decoder, can be nil if initialization in the C API fails
-func newWktDecoder() *wktDecoder {
-	r := cGEOSWKTReader_create()
+func (context *GeosContext) newWktDecoder() *wktDecoder {
+	return newWktDecoder(context)
+}
+
+func newWktDecoder(context *GeosContext) *wktDecoder {
+	r := cGEOSWKTReader_create(context)
 	if r == nil {
 		return nil
 	}
@@ -27,19 +31,19 @@ func newWktDecoder() *wktDecoder {
 }
 
 // decode decodes the WKT string and returns a geometry
-func (d *wktDecoder) decode(wkt string) (*Geometry, error) {
+func (d *wktDecoder) decode(context *GeosContext, wkt string) (*Geometry, error) {
 	cstr := C.CString(wkt)
 	defer C.free(unsafe.Pointer(cstr))
-	g := cGEOSWKTReader_read(d.r, cstr)
+	g := cGEOSWKTReader_read(context, d.r, cstr)
 	if g == nil {
 		return nil, Error()
 	}
-	return geomFromPtr(g), nil
+	return context.geomFromPtr(g), nil
 }
 
 func (d *wktDecoder) destroy() {
 	// XXX: mutex
-	cGEOSWKTReader_destroy(d.r)
+	cGEOSWKTReader_destroy(geosGlobalContext, d.r)
 	d.r = nil
 }
 
@@ -48,7 +52,7 @@ type wktEncoder struct {
 }
 
 func newWktEncoder() *wktEncoder {
-	w := cGEOSWKTWriter_create()
+	w := cGEOSWKTWriter_create(geosGlobalContext)
 	if w == nil {
 		return nil
 	}
@@ -59,7 +63,7 @@ func newWktEncoder() *wktEncoder {
 
 // Encode returns a string that is the geometry encoded as WKT
 func (e *wktEncoder) encode(g *Geometry) (string, error) {
-	cstr := cGEOSWKTWriter_write(e.w, g.g)
+	cstr := cGEOSWKTWriter_write(geosGlobalContext, e.w, g.g)
 	if cstr == nil {
 		return "", Error()
 	}
@@ -68,6 +72,6 @@ func (e *wktEncoder) encode(g *Geometry) (string, error) {
 
 func (e *wktEncoder) destroy() {
 	// XXX: mutex
-	cGEOSWKTWriter_destroy(e.w)
+	cGEOSWKTWriter_destroy(geosGlobalContext, e.w)
 	e.w = nil
 }

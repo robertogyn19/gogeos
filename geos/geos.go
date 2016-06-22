@@ -21,6 +21,20 @@ var (
 	handlemu sync.Mutex
 )
 
+type GeosContext struct {
+	handle   C.GEOSContextHandle_t
+	handlemu sync.Mutex
+}
+
+func NewGeosContext() *GeosContext {
+	handle := C.gogeos_initGEOS()
+	mu := sync.Mutex{}
+	context := GeosContext{handle, mu}
+	return &context
+}
+
+var geosGlobalContext = &GeosContext{handle, handlemu}
+
 // XXX: store last error message from handler in a global var (chan?)
 
 // Version returns the version of the GEOS C API in use.

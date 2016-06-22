@@ -17,48 +17,48 @@ type STRTreeItem interface {
 	Parse() []byte
 }
 
-type strTree struct {
+type StrTree struct {
 	r  *C.GEOSSTRtree
 	cb C.GEOSQueryCallback
 }
 
-func NewSTRTree(capacity int) *strTree {
-	r := cGEOSSTRtree_create(C.size_t(capacity))
+func NewSTRTree(capacity int) *StrTree {
+	r := cGEOSSTRtree_create(geosGlobalContext, C.size_t(capacity))
 
 	if r == nil {
 		return nil
 	}
 
-	strtree := &strTree{r, NewCallback()}
-	runtime.SetFinalizer(strtree, (*strTree).destroy)
+	strtree := &StrTree{r, NewCallback()}
+	runtime.SetFinalizer(strtree, (*StrTree).destroy)
 
 	return strtree
 }
 
-func (tree *strTree) Insert(g *Geometry, item STRTreeItem) {
+func (tree *StrTree) Insert(g *Geometry, item STRTreeItem) {
 	bstr := item.Parse()
 	cstr := C.CString(string(bstr))
 	p := (*C.void)(unsafe.Pointer(cstr))
 
-	cGEOSSTRtree_insert(tree.r, g.g, p)
+	cGEOSSTRtree_insert(geosGlobalContext, tree.r, g.g, p)
 }
 
-func (tree *strTree) Query(g *Geometry, cb STRTreeCallbackFunc) {
+func (tree *StrTree) Query(g *Geometry, cb STRTreeCallbackFunc) {
 	cbid := register(cb)
 	ccbid := C.int(cbid)
-	cGEOSSTRtree_query(tree.r, g.g, tree.cb, (*C.void)(unsafe.Pointer(&ccbid)))
+	cGEOSSTRtree_query(geosGlobalContext, tree.r, g.g, tree.cb, (*C.void)(unsafe.Pointer(&ccbid)))
 	defer unregister(cbid)
 }
 
-func (tree *strTree) Iterate(cb STRTreeCallbackFunc) {
+func (tree *StrTree) Iterate(cb STRTreeCallbackFunc) {
 	cbid := register(cb)
 	ccbid := C.int(cbid)
-	cGEOSSTRtree_iterate(tree.r, tree.cb, (*C.void)(unsafe.Pointer(&ccbid)))
+	cGEOSSTRtree_iterate(geosGlobalContext, tree.r, tree.cb, (*C.void)(unsafe.Pointer(&ccbid)))
 	defer unregister(cbid)
 }
 
-func (tree *strTree) destroy() {
-	cGEOSSTRtree_destroy(tree.r)
+func (tree *StrTree) destroy() {
+	cGEOSSTRtree_destroy(geosGlobalContext, tree.r)
 	tree.r = nil
 }
 

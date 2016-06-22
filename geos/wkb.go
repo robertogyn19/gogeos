@@ -16,7 +16,7 @@ type wkbDecoder struct {
 }
 
 func newWkbDecoder() *wkbDecoder {
-	r := cGEOSWKBReader_create()
+	r := cGEOSWKBReader_create(geosGlobalContext)
 	d := &wkbDecoder{r}
 	runtime.SetFinalizer(d, (*wkbDecoder).destroy)
 	return d
@@ -24,7 +24,7 @@ func newWkbDecoder() *wkbDecoder {
 
 func (d *wkbDecoder) destroy() {
 	// XXX: mutex
-	cGEOSWKBReader_destroy(d.r)
+	cGEOSWKBReader_destroy(geosGlobalContext, d.r)
 	d.r = nil
 }
 
@@ -33,7 +33,7 @@ func (d *wkbDecoder) decode(wkb []byte) (*Geometry, error) {
 	for i := range wkb {
 		cwkb = append(cwkb, C.uchar(wkb[i]))
 	}
-	g := cGEOSWKBReader_read(d.r, &cwkb[0], C.size_t(len(wkb)))
+	g := cGEOSWKBReader_read(geosGlobalContext, d.r, &cwkb[0], C.size_t(len(wkb)))
 	if g == nil {
 		return nil, Error()
 	}
@@ -53,7 +53,7 @@ type wkbEncoder struct {
 }
 
 func newWkbEncoder() *wkbEncoder {
-	w := cGEOSWKBWriter_create()
+	w := cGEOSWKBWriter_create(geosGlobalContext)
 	if w == nil {
 		return nil
 	}
@@ -80,15 +80,15 @@ func encodeWkb(e *wkbEncoder, g *Geometry, fn func(*C.GEOSWKBWriter, *C.GEOSGeom
 }
 
 func (e *wkbEncoder) encode(g *Geometry) ([]byte, error) {
-	return encodeWkb(e, g, cGEOSWKBWriter_write)
+	return encodeWkb(e, g, geosGlobalContext.cGEOSWKBWriter_write)
 }
 
 func (e *wkbEncoder) encodeHex(g *Geometry) ([]byte, error) {
-	return encodeWkb(e, g, cGEOSWKBWriter_writeHEX)
+	return encodeWkb(e, g, geosGlobalContext.cGEOSWKBWriter_writeHEX)
 }
 
 func (e *wkbEncoder) destroy() {
 	// XXX: mutex
-	cGEOSWKBWriter_destroy(e.w)
+	cGEOSWKBWriter_destroy(geosGlobalContext, e.w)
 	e.w = nil
 }

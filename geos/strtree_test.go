@@ -18,7 +18,7 @@ func (i itemTest) Parse() []byte {
 	return []byte(i)
 }
 
-func TestStrTree_Insert(t *testing.T) {
+func TestStrTreeInsert(t *testing.T) {
 	tree := NewSTRTree(10)
 
 	item := itemTest("test1")

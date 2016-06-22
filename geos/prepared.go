@@ -18,14 +18,14 @@ type PGeometry struct {
 
 // PrepareGeometry constructs a prepared geometry from a normal geometry object.
 func PrepareGeometry(g *Geometry) *PGeometry {
-	ptr := cGEOSPrepare(g.g)
+	ptr := cGEOSPrepare(geosGlobalContext, g.g)
 	p := &PGeometry{ptr}
 	runtime.SetFinalizer(p, (*PGeometry).destroy)
 	return p
 }
 
 func (p *PGeometry) destroy() {
-	cGEOSPreparedGeom_destroy(p.p)
+	cGEOSPreparedGeom_destroy(geosGlobalContext, p.p)
 	p.p = nil
 }
 
@@ -34,61 +34,61 @@ func (p *PGeometry) destroy() {
 // Contains computes whether the prepared geometry contains the other prepared
 // geometry.
 func (p *PGeometry) Contains(other *Geometry) (bool, error) {
-	return p.predicate("contains", cGEOSPreparedContains, other)
+	return p.predicate("contains", geosGlobalContext.cGEOSPreparedContains, other)
 }
 
 // ContainsP computes whether the prepared geometry properly contains the other
 // prepared geometry.
 func (p *PGeometry) ContainsP(other *Geometry) (bool, error) {
-	return p.predicate("contains", cGEOSPreparedContainsProperly, other)
+	return p.predicate("contains", geosGlobalContext.cGEOSPreparedContainsProperly, other)
 }
 
 // CoveredBy computes whether the prepared geometry is covered by the other
 // prepared geometry.
 func (p *PGeometry) CoveredBy(other *Geometry) (bool, error) {
-	return p.predicate("covered by", cGEOSPreparedCoveredBy, other)
+	return p.predicate("covered by", geosGlobalContext.cGEOSPreparedCoveredBy, other)
 }
 
 // Covers computes whether the prepared geometry covers the other prepared
 // geometry.
 func (p *PGeometry) Covers(other *Geometry) (bool, error) {
-	return p.predicate("covers", cGEOSPreparedCovers, other)
+	return p.predicate("covers", geosGlobalContext.cGEOSPreparedCovers, other)
 }
 
 // Crosses computes whether the prepared geometry crosses the other prepared
 // geometry.
 func (p *PGeometry) Crosses(other *Geometry) (bool, error) {
-	return p.predicate("crosses", cGEOSPreparedCrosses, other)
+	return p.predicate("crosses", geosGlobalContext.cGEOSPreparedCrosses, other)
 }
 
 // Disjoint computes whether the prepared geometry is disjoint from the other
 // prepared geometry.
 func (p *PGeometry) Disjoint(other *Geometry) (bool, error) {
-	return p.predicate("disjoint", cGEOSPreparedDisjoint, other)
+	return p.predicate("disjoint", geosGlobalContext.cGEOSPreparedDisjoint, other)
 }
 
 // Intersects computes whether the prepared geometry intersects the other
 // prepared geometry.
 func (p *PGeometry) Intersects(other *Geometry) (bool, error) {
-	return p.predicate("intersects", cGEOSPreparedIntersects, other)
+	return p.predicate("intersects", geosGlobalContext.cGEOSPreparedIntersects, other)
 }
 
 // Overlaps computes whether the prepared geometry overlaps the other
 // prepared geometry.
 func (p *PGeometry) Overlaps(other *Geometry) (bool, error) {
-	return p.predicate("overlaps", cGEOSPreparedOverlaps, other)
+	return p.predicate("overlaps", geosGlobalContext.cGEOSPreparedOverlaps, other)
 }
 
 // Touches computes whether the prepared geometry touches the other
 // prepared geometry.
 func (p *PGeometry) Touches(other *Geometry) (bool, error) {
-	return p.predicate("touches", cGEOSPreparedTouches, other)
+	return p.predicate("touches", geosGlobalContext.cGEOSPreparedTouches, other)
 }
 
 // Within computes whether the prepared geometry is within the other
 // prepared geometry.
 func (p *PGeometry) Within(other *Geometry) (bool, error) {
-	return p.predicate("within", cGEOSPreparedWithin, other)
+	return p.predicate("within", geosGlobalContext.cGEOSPreparedWithin, other)
 }
 
 func (p *PGeometry) predicate(name string, fn func(*C.GEOSPreparedGeometry, *C.GEOSGeometry) C.char, other *Geometry) (bool, error) {
